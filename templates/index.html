@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Weather<span class="highlight">CLI</span> Web</h1>
+            <p>Sleek, fast, and responsive weather tracking.</p>
+        </header>
+
+        <main>
+            <form id="weather-form">
+                <div class="search-box">
+                    <input type="text" id="city-input" placeholder="Enter city name..." required>
+                    <button type="submit">Search</button>
+                </div>
+                <div class="controls">
+                    <label>
+                        <input type="checkbox" id="unit-toggle"> Fahrenheit
+                    </label>
+                    <label>
+                        <input type="checkbox" id="forecast-toggle"> Show Tomorrow's Forecast
+                    </label>
+                </div>
+            </form>
+
+            <div id="loading" class="hidden glass-card msg-card">Fetching weather data...</div>
+            <div id="error-message" class="hidden glass-card msg-card error-msg"></div>
+            
+            <div id="weather-result" class="hidden glass-card">
+                <h2 id="result-city"></h2>
+                <div class="weather-current">
+                    <div class="temp-block">
+                        <div class="label">Temperature</div>
+                        <div class="value" id="result-temp">--</div>
+                    </div>
+                    <div class="detail-block">
+                        <div class="label">Condition</div>
+                        <div class="value" id="result-condition">--</div>
+                    </div>
+                    <div class="detail-block">
+                        <div class="label">Wind Speed</div>
+                        <div class="value" id="result-wind">--</div>
+                    </div>
+                </div>
+
+                <div id="forecast-container" class="hidden">
+                    <hr>
+                    <h3>Tomorrow's Forecast (<span id="forecast-date"></span>)</h3>
+                    <div class="weather-forecast">
+                        <div class="detail-block">
+                            <div class="label">High / Low</div>
+                            <div class="value" id="forecast-temps">-- / --</div>
+                        </div>
+                        <div class="detail-block">
+                            <div class="label">Condition</div>
+                            <div class="value" id="forecast-condition">--</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="status-footer">
+                    <span id="cache-status" class="status-badge">--</span>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        document.getElementById('weather-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const city = document.getElementById('city-input').value;
+            const unit = document.getElementById('unit-toggle').checked ? 'fahrenheit' : 'celsius';
+            const forecast = document.getElementById('forecast-toggle').checked;
+
+            const loading = document.getElementById('loading');
+            const errorMessage = document.getElementById('error-message');
+            const weatherResult = document.getElementById('weather-result');
+
+            loading.classList.remove('hidden');
+            errorMessage.classList.add('hidden');
+            weatherResult.classList.add('hidden');
+
+            try {
+                const response = await fetch(`/api/weather?city=${encodeURIComponent(city)}&unit=${unit}&forecast=${forecast}`);
+                const data = await response.json();
+
+                loading.classList.add('hidden');
+
+                if (!response.ok) {
+                    errorMessage.textContent = data.error || 'An unexpected error occurred.';
+                    errorMessage.classList.remove('hidden');
+                    return;
+                }
+
+                // Populate UI
+                document.getElementById('result-city').textContent = data.display_name;
+                document.getElementById('result-temp').textContent = `${data.weather.temperature}${data.weather.unit}`;
+                document.getElementById('result-condition').textContent = data.weather.condition;
+                document.getElementById('result-wind').textContent = `${data.weather.wind_speed} km/h`;
+
+                if (data.weather.forecast) {
+                    document.getElementById('forecast-container').classList.remove('hidden');
+                    document.getElementById('forecast-date').textContent = data.weather.forecast.date;
+                    document.getElementById('forecast-temps').textContent = `${data.weather.forecast.max_temp}${data.weather.unit} / ${data.weather.forecast.min_temp}${data.weather.unit}`;
+                    document.getElementById('forecast-condition').textContent = data.weather.forecast.condition;
+                } else {
+                    document.getElementById('forecast-container').classList.add('hidden');
+                }
+
+                const badge = document.getElementById('cache-status');
+                badge.textContent = data.is_cached ? 'Cached' : 'Fetched Fresh';
+                badge.className = `status-badge ${data.is_cached ? 'cached' : 'fresh'}`;
+
+                weatherResult.classList.remove('hidden');
+            } catch (err) {
+                loading.classList.add('hidden');
+                errorMessage.textContent = 'Network error fetching weather.';
+                errorMessage.classList.remove('hidden');
+            }
+        });
+    </script>
+</body>
+</html>
