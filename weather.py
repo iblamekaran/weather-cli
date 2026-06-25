@@ -4,6 +4,13 @@ import requests
 from api import geocode_city, fetch_weather
 from cache import get_cached, set_cache
 
+# Ensure console can print Unicode emojis (especially on Windows)
+if sys.stdout.encoding.lower() != 'utf-8':
+    try:
+        sys.stdout.reconfigure(encoding='utf-8')
+    except AttributeError:
+        pass
+
 # Simple ANSI colors for terminal output
 class Colors:
     CYAN = '\033[96m'
@@ -80,7 +87,7 @@ def main():
         sys.exit(1)
     except Exception as e:
         # Catch-all for unexpected errors so we don't show stack traces to users
-        print(f"{Colors.RED}Unexpected Error:{Colors.RESET} Something went wrong.")
+        print(f"{Colors.RED}Unexpected Error:{Colors.RESET} {str(e)}")
         sys.exit(1)
 
 if __name__ == "__main__":
