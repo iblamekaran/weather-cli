@@ -55,7 +55,8 @@ def main():
             print(f"{Colors.RED}Error:{Colors.RESET} Couldn't find a city called '{city_name}'. Check spelling and try again.")
             sys.exit(1)
 
-        display_name = f"{location['name']}, {location['country']}"
+        flag = location.get('flag', '')
+        display_name = f"{location['name']}, {location['country']} {flag}".strip()
 
         # 3. Fetch Weather
         weather_data = fetch_weather(location['lat'], location['lon'], unit=args.unit, include_forecast=args.forecast)

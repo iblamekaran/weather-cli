@@ -17,11 +17,17 @@ def retry_once(func):
             return func(*args, **kwargs)
     return wrapper
 
+def get_flag_emoji(country_code: str) -> str:
+    """Converts a 2-letter ISO country code to a Unicode flag emoji."""
+    if not country_code or len(country_code) != 2:
+        return ""
+    return chr(ord(country_code[0].upper()) + 127397) + chr(ord(country_code[1].upper()) + 127397)
+
 @retry_once
 def geocode_city(city_name: str) -> dict | None:
     """
     Calls Open-Meteo geocoding API.
-    Returns {"lat": float, "lon": float, "name": str, "country": str} or None if not found.
+    Returns {"lat": float, "lon": float, "name": str, "country": str, "flag": str} or None if not found.
     """
     url = f"https://geocoding-api.open-meteo.com/v1/search?name={city_name}&count=1&language=en&format=json"
     response = requests.get(url, timeout=10)
@@ -32,11 +38,13 @@ def geocode_city(city_name: str) -> dict | None:
         return None
         
     result = data["results"][0]
+    country_code = result.get("country_code", "")
     return {
         "lat": result["latitude"],
         "lon": result["longitude"],
         "name": result["name"],
-        "country": result.get("country", "Unknown")
+        "country": result.get("country", "Unknown"),
+        "flag": get_flag_emoji(country_code)
     }
 
 def get_weather_description(code: int) -> str:

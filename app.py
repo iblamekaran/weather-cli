@@ -30,7 +30,8 @@ def get_weather():
     if not location:
         return jsonify({"error": f"Couldn't find a city called '{city_name}'."}), 404
 
-    display_name = f"{location['name']}, {location['country']}"
+    flag = location.get('flag', '')
+    display_name = f"{location['name']}, {location['country']} {flag}".strip()
 
     # 3. Fetch Weather
     weather_data = fetch_weather(location['lat'], location['lon'], unit=unit, include_forecast=forecast)
