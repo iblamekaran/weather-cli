@@ -32,6 +32,44 @@ python app.py
 ```
 Then, open your web browser and navigate to `http://127.0.0.1:5000`.
 
+## 📂 Project Structure
+
+```text
+WEATHER-CLI/
+│
+├── app.py
+│   └── Flask entry point — defines routes (/, /api/weather) and serves the UI
+│
+├── api.py
+│   └── External API layer — handles Open-Meteo Geocoding and Weather requests
+│
+├── cache.py
+│   └── Local JSON caching logic — stores responses with timestamps and expires after 10 minutes
+│
+├── weather.py
+│   └── Weather data formatting and display helpers (including country flag emoji mapping)
+│
+├── cache_store.json
+│   └── Auto-generated cache file — created at runtime and ignored by Git
+│
+├── requirements.txt
+│   └── Python dependencies (Flask, requests, gunicorn)
+│
+├── .gitignore
+│   └── Excludes venv/, __pycache__/, and cache_store.json
+│
+├── README.md
+│   └── Project documentation
+│
+├── static/
+│   └── style.css
+│       └── Glassmorphism UI styling — cards, gradients, and layout
+│
+└── templates/
+    └── index.html
+        └── Main Flask HTML template — weather search interface
+```
+    
 ## What I Learned Building This
 - **Web Frameworks (Flask):** Migrated a CLI Python script into a full web application by exposing API endpoints (`/api/weather`) and serving HTML templates.
 - **Frontend Integration:** Used the JavaScript `fetch` API to asynchronously call the backend Python server and dynamically update the DOM without reloading the page.
